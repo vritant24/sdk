@@ -1,0 +1,58 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ClickOnce.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PublishDirName>app.publish</PublishDirName>
+    <PublishDir>$(OutputPath)app.publish\</PublishDir>
+    <GenerateManifests>true</GenerateManifests>
+    <_DeploymentSignClickOnceManifests Condition="'$(SignManifests)' == 'true'">true</_DeploymentSignClickOnceManifests>
+    <PublishProtocolProviderTargets>ClickOncePublish</PublishProtocolProviderTargets>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
+    <GenerateManifestsDependsOn>
+       GenerateBuildRuntimeConfigurationFiles;
+       $(GenerateManifestsDependsOn)
+    </GenerateManifestsDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateDependencyFile)'=='true'">
+    <GenerateManifestsDependsOn>
+      GenerateBuildDependencyFile;
+      $(GenerateManifestsDependsOn)
+    </GenerateManifestsDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
+    <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)"/>
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(GenerateDependencyFile)' == 'true'">
+    <ProjectDepsFilesForClickOnce Include="$(ProjectDepsFilePath)"/>
+  </ItemGroup>
+
+  <ItemGroup>
+     <NetCoreRuntimeJsonFilesForClickOnce Include="@(ProjectRuntimeConfigFilesForClickOnce);@(ProjectDepsFilesForClickOnce)"/>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ClickOncePublishDependsOn>
+      $(ClickOncePublishDependsOn);
+      _CopyFilesToPublishFolder;
+      _DeploymentGenerateBootstrapper;
+      ResolveKeySource;
+      _DeploymentSignClickOnceDeployment;
+    </ClickOncePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="ClickOncePublish" DependsOnTargets="$(ClickOncePublishDependsOn)" />
+</Project>

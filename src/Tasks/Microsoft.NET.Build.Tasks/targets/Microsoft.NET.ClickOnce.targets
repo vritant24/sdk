@@ -18,6 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishProtocolProviderTargets>ClickOncePublish</PublishProtocolProviderTargets>
   </PropertyGroup>
 
+  <!-- Ensure runtimeconfig.json is built before clickonce manifest generation -->
   <PropertyGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
     <GenerateManifestsDependsOn>
        GenerateBuildRuntimeConfigurationFiles;
@@ -25,6 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GenerateManifestsDependsOn>
   </PropertyGroup>
 
+  <!-- Ensure deps.json is built before clickonce manifest generation -->
   <PropertyGroup Condition="'$(GenerateDependencyFile)'=='true'">
     <GenerateManifestsDependsOn>
       GenerateBuildDependencyFile;
@@ -33,17 +35,22 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ItemGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
-    <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)"/>
+    <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath)"/>
   </ItemGroup>
   
   <ItemGroup Condition="'$(GenerateDependencyFile)' == 'true'">
     <ProjectDepsFilesForClickOnce Include="$(ProjectDepsFilePath)"/>
   </ItemGroup>
 
+  <!-- Add runtimeconfig and deps json file to item group that's included in files for clickonce publishing -->
   <ItemGroup>
      <NetCoreRuntimeJsonFilesForClickOnce Include="@(ProjectRuntimeConfigFilesForClickOnce);@(ProjectDepsFilesForClickOnce)"/>
   </ItemGroup>
 
+  <!-- 
+    Add necessary clickonce targets that need to run during publish process.
+    These targets are defined in MS.Common.CurrentVersion.targets in the msbuild repo.
+  -->
   <PropertyGroup>
     <ClickOncePublishDependsOn>
       $(ClickOncePublishDependsOn);
